@@ -1,6 +1,6 @@
 # AI Academy Backend
 
-This is the backend service for handling form submissions from the AI Academy website. It processes enrollment and contact forms, then sends notifications via WhatsApp and email while storing the data in MongoDB for the admin dashboard.
+This is the backend service for handling form submissions from the AI Academy website. It processes enrollment and contact forms, then sends notifications via email while storing the data in MongoDB for the admin dashboard.
 
 ## Setup Instructions
 
@@ -27,12 +27,6 @@ This is the backend service for handling form submissions from the AI Academy we
    EMAIL_USER=your_email@gmail.com
    EMAIL_PASS=your_app_password
    ADMIN_EMAIL=admin@yourcompany.com
-
-   # Twilio configuration (for WhatsApp)
-   TWILIO_ACCOUNT_SID=your_twilio_account_sid
-   TWILIO_AUTH_TOKEN=your_twilio_auth_token
-   TWILIO_WHATSAPP_NUMBER=your_twilio_whatsapp_number
-   ADMIN_WHATSAPP_NUMBER=+1234567890
    ```
 
 3. **Start the Server**
@@ -70,13 +64,6 @@ Currently configured for Gmail. You'll need to:
 2. Generate an App Password
 3. Use the App Password in `EMAIL_PASS`
 
-### WhatsApp (Twilio)
-To enable WhatsApp notifications:
-1. Sign up for a Twilio account
-2. Get your Account SID and Auth Token
-3. Register a WhatsApp Business number
-4. Update the environment variables with your credentials
-
 ## Development
 
 The backend uses:
@@ -84,4 +71,11 @@ The backend uses:
 - MongoDB for data persistence
 - Mongoose as the ODM
 - Nodemailer for email notifications
-- Twilio SDK for WhatsApp messaging
+
+## Deployment
+
+For deployment on Render:
+1. Make sure all environment variables are properly configured
+2. The service will automatically bind to the port specified by Render
+3. Use the production environment variables in `.env.production`
+4. Verify your Gmail App Password is correctly configured
