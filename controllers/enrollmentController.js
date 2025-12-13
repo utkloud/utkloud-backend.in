@@ -11,13 +11,14 @@ const sendEmail = async (data) => {
       );
       return {
         success: true,
-        message: "Email notification skipped (not configured)",
+        message: "Email notification skipped (no admin email configured)",
       };
     }
 
     // Log email configuration for debugging (without exposing secrets)
     console.log("Email configuration check:", {
       adminEmail: process.env.ADMIN_EMAIL,
+      fromEmail: process.env.SENDGRID_FROM_EMAIL || process.env.EMAIL_USER,
       usingSendGrid: !!process.env.SENDGRID_API_KEY
     });
 
@@ -25,11 +26,11 @@ const sendEmail = async (data) => {
     
     // Check if we should use SendGrid
     if (process.env.SENDGRID_API_KEY) {
-      // Use SendGrid with multiple connection options
+      // Use SendGrid with alternative connection options
       transporter = nodemailer.createTransport({
         host: "smtp.sendgrid.net",
-        port: 587,
-        secure: false,
+        port: 465,
+        secure: true, // Use SSL on port 465
         auth: {
           user: "apikey",
           pass: process.env.SENDGRID_API_KEY,
@@ -42,7 +43,7 @@ const sendEmail = async (data) => {
         socketTimeout: 30000,
       });
       
-      console.log("Using SendGrid transport");
+      console.log("Using SendGrid transport with SSL on port 465");
     } else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       // Use Gmail
       transporter = nodemailer.createTransport({
@@ -121,7 +122,10 @@ const sendEmail = async (data) => {
       html: html,
     };
 
-    console.log("Attempting to send email to:", process.env.ADMIN_EMAIL);
+    console.log("Attempting to send email:");
+    console.log("- From:", mailOptions.from);
+    console.log("- To:", mailOptions.to);
+    console.log("- Subject:", mailOptions.subject);
 
     // Add retry mechanism with exponential backoff
     let lastError;
@@ -137,6 +141,13 @@ const sendEmail = async (data) => {
       } catch (error) {
         lastError = error;
         console.log(`Email attempt ${i + 1} failed:`, error.message);
+        console.log("Error details:", {
+          code: error.code,
+          command: error.command,
+          response: error.response,
+          responseCode: error.responseCode
+        });
+        
         if (i < 2) {
           // Wait with exponential backoff (2s, 4s)
           await new Promise(resolve => setTimeout(resolve, Math.pow(2, i + 1) * 1000));
