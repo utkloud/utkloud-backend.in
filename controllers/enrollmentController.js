@@ -5,11 +5,7 @@ import Enrollment from "../models/Enrollment.js";
 const sendEmail = async (data) => {
   try {
     // Check if email credentials are configured
-    if (
-      !process.env.EMAIL_USER ||
-      !process.env.EMAIL_PASS ||
-      !process.env.ADMIN_EMAIL
-    ) {
+    if (!process.env.ADMIN_EMAIL) {
       console.warn(
         "Email credentials not configured. Skipping email notification."
       );
@@ -21,22 +17,22 @@ const sendEmail = async (data) => {
 
     // Log email configuration for debugging (without exposing secrets)
     console.log("Email configuration check:", {
-      emailUser: process.env.EMAIL_USER,
       adminEmail: process.env.ADMIN_EMAIL,
+      usingSendGrid: !!process.env.SENDGRID_API_KEY,
     });
 
     let transporter;
-    
-    // Check if we should use SSL (port 465) or TLS (port 587)
-    if (process.env.EMAIL_USE_SSL === 'true') {
-      // Use SSL on port 465
+
+    // Check if we should use SendGrid
+    if (process.env.SENDGRID_API_KEY) {
+      // Use SendGrid
       transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true, // true for 465, false for other ports
+        host: "smtp.sendgrid.net",
+        port: 587,
+        secure: false,
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
+          user: "apikey",
+          pass: process.env.SENDGRID_API_KEY,
         },
         tls: {
           rejectUnauthorized: false,
@@ -109,7 +105,10 @@ const sendEmail = async (data) => {
     }
 
     const mailOptions = {
-      from: process.env.EMAIL_USER,
+      from:
+        process.env.SENDGRID_FROM_EMAIL ||
+        process.env.EMAIL_USER ||
+        "noreply@academy.com",
       to: process.env.ADMIN_EMAIL,
       subject: subject,
       html: html,
@@ -133,11 +132,11 @@ const sendEmail = async (data) => {
         console.log(`Email attempt ${i + 1} failed, retrying...`);
         if (i < 2) {
           // Wait 2 seconds before retrying
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         }
       }
     }
-    
+
     throw lastError;
   } catch (error) {
     console.error("Error sending email:", error);
