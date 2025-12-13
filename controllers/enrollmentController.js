@@ -18,14 +18,14 @@ const sendEmail = async (data) => {
     // Log email configuration for debugging (without exposing secrets)
     console.log("Email configuration check:", {
       adminEmail: process.env.ADMIN_EMAIL,
-      usingSendGrid: !!process.env.SENDGRID_API_KEY,
+      usingSendGrid: !!process.env.SENDGRID_API_KEY
     });
 
     let transporter;
-
+    
     // Check if we should use SendGrid
     if (process.env.SENDGRID_API_KEY) {
-      // Use SendGrid
+      // Use SendGrid with multiple connection options
       transporter = nodemailer.createTransport({
         host: "smtp.sendgrid.net",
         port: 587,
@@ -41,8 +41,10 @@ const sendEmail = async (data) => {
         greetingTimeout: 30000,
         socketTimeout: 30000,
       });
-    } else {
-      // Use Gmail with TLS on port 587 (default)
+      
+      console.log("Using SendGrid transport");
+    } else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      // Use Gmail
       transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -58,6 +60,14 @@ const sendEmail = async (data) => {
         greetingTimeout: 30000,
         socketTimeout: 30000,
       });
+      
+      console.log("Using Gmail transport");
+    } else {
+      console.warn("No valid email configuration found");
+      return {
+        success: true,
+        message: "Email notification skipped (no valid configuration)",
+      };
     }
 
     // Format email based on form type
@@ -105,10 +115,7 @@ const sendEmail = async (data) => {
     }
 
     const mailOptions = {
-      from:
-        process.env.SENDGRID_FROM_EMAIL ||
-        process.env.EMAIL_USER ||
-        "noreply@academy.com",
+      from: process.env.SENDGRID_FROM_EMAIL || process.env.EMAIL_USER || "noreply@academy.com",
       to: process.env.ADMIN_EMAIL,
       subject: subject,
       html: html,
@@ -116,12 +123,12 @@ const sendEmail = async (data) => {
 
     console.log("Attempting to send email to:", process.env.ADMIN_EMAIL);
 
-    // Add retry mechanism
+    // Add retry mechanism with exponential backoff
     let lastError;
     for (let i = 0; i < 3; i++) {
       try {
         const info = await transporter.sendMail(mailOptions);
-        console.log("Email sent:", info.response);
+        console.log("Email sent successfully:", info.messageId);
         return {
           success: true,
           message: "Email sent successfully",
@@ -129,14 +136,14 @@ const sendEmail = async (data) => {
         };
       } catch (error) {
         lastError = error;
-        console.log(`Email attempt ${i + 1} failed, retrying...`);
+        console.log(`Email attempt ${i + 1} failed:`, error.message);
         if (i < 2) {
-          // Wait 2 seconds before retrying
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          // Wait with exponential backoff (2s, 4s)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, i + 1) * 1000));
         }
       }
     }
-
+    
     throw lastError;
   } catch (error) {
     console.error("Error sending email:", error);
@@ -144,6 +151,7 @@ const sendEmail = async (data) => {
       code: error.code,
       command: error.command,
       message: error.message,
+      stack: error.stack
     });
     return { success: false, error: error.message };
   }
