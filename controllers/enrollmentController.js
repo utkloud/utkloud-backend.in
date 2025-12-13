@@ -25,19 +25,44 @@ const sendEmail = async (data) => {
       adminEmail: process.env.ADMIN_EMAIL,
     });
 
-    // Initialize email transporter with proper configuration for production
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+    let transporter;
+    
+    // Check if we should use SSL (port 465) or TLS (port 587)
+    if (process.env.EMAIL_USE_SSL === 'true') {
+      // Use SSL on port 465
+      transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true, // true for 465, false for other ports
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+        connectionTimeout: 30000,
+        greetingTimeout: 30000,
+        socketTimeout: 30000,
+      });
+    } else {
+      // Use Gmail with TLS on port 587 (default)
+      transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+        connectionTimeout: 30000,
+        greetingTimeout: 30000,
+        socketTimeout: 30000,
+      });
+    }
 
     // Format email based on form type
     let subject, html;
@@ -92,13 +117,28 @@ const sendEmail = async (data) => {
 
     console.log("Attempting to send email to:", process.env.ADMIN_EMAIL);
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Email sent:", info.response);
-    return {
-      success: true,
-      message: "Email sent successfully",
-      messageId: info.messageId,
-    };
+    // Add retry mechanism
+    let lastError;
+    for (let i = 0; i < 3; i++) {
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Email sent:", info.response);
+        return {
+          success: true,
+          message: "Email sent successfully",
+          messageId: info.messageId,
+        };
+      } catch (error) {
+        lastError = error;
+        console.log(`Email attempt ${i + 1} failed, retrying...`);
+        if (i < 2) {
+          // Wait 2 seconds before retrying
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+    }
+    
+    throw lastError;
   } catch (error) {
     console.error("Error sending email:", error);
     console.error("Email error details:", {
