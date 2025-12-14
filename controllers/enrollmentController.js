@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import sgMail from "@sendgrid/mail";
 import Enrollment from "../models/Enrollment.js";
 
@@ -6,216 +5,115 @@ import Enrollment from "../models/Enrollment.js";
 const sendEmail = async (data) => {
   try {
     // Check if email credentials are configured
-    if (!process.env.ADMIN_EMAIL) {
+    if (!process.env.ADMIN_EMAIL || !process.env.SENDGRID_API_KEY) {
       console.warn(
         "Email credentials not configured. Skipping email notification."
       );
+      console.log("Environment variables check:", {
+        adminEmail: process.env.ADMIN_EMAIL,
+        sendGridApiKey: !!process.env.SENDGRID_API_KEY,
+        sendGridFromEmail: process.env.SENDGRID_FROM_EMAIL
+      });
       return {
         success: true,
-        message: "Email notification skipped (no admin email configured)",
+        message: "Email notification skipped (not configured)",
       };
     }
 
     // Log email configuration for debugging
     console.log("Email configuration check:", {
       adminEmail: process.env.ADMIN_EMAIL,
+      fromEmail: process.env.SENDGRID_FROM_EMAIL,
       usingSendGrid: !!process.env.SENDGRID_API_KEY
     });
 
-    // Check if we should use SendGrid REST API
-    if (process.env.SENDGRID_API_KEY) {
-      // Use SendGrid REST API
-      sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-      
-      // Format email based on form type
-      let subject, html;
-      if (data.type === "enrollment") {
-        subject = `New Course Enrollment: ${data.course}`;
-        html = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #003366;">🎓 New Course Enrollment</h2>
-            <div style="background-color: #f5f7fa; padding: 20px; border-radius: 8px;">
-              <p><strong>Name:</strong> ${data.name}</p>
-              <p><strong>Email:</strong> ${data.email}</p>
-              <p><strong>Phone:</strong> ${data.phone}</p>
-              <p><strong>Course:</strong> ${data.course}</p>
-              <p><strong>Experience Level:</strong> ${
-                data.experience || "Not specified"
-              }</p>
-              <p><strong>Submission Date:</strong> ${new Date(
-                data.createdAt
-              ).toLocaleString()}</p>
-            </div>
+    // Use SendGrid REST API
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    
+    // Format email based on form type
+    let subject, html;
+    if (data.type === "enrollment") {
+      subject = `New Course Enrollment: ${data.course}`;
+      html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #003366;">🎓 New Course Enrollment</h2>
+          <div style="background-color: #f5f7fa; padding: 20px; border-radius: 8px;">
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Phone:</strong> ${data.phone}</p>
+            <p><strong>Course:</strong> ${data.course}</p>
+            <p><strong>Experience Level:</strong> ${
+              data.experience || "Not specified"
+            }</p>
+            <p><strong>Submission Date:</strong> ${new Date(
+              data.createdAt
+            ).toLocaleString()}</p>
           </div>
-        `;
-      } else {
-        subject = "New Contact Message";
-        html = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #003366;">📧 New Contact Message</h2>
-            <div style="background-color: #f5f7fa; padding: 20px; border-radius: 8px;">
-              <p><strong>Name:</strong> ${data.name}</p>
-              <p><strong>Email:</strong> ${data.email}</p>
-              <p><strong>Phone:</strong> ${data.phone}</p>
-              <p><strong>Course Interest:</strong> ${
-                data.course || "Not specified"
-              }</p>
-              <p><strong>Message:</strong> ${
-                data.message || "No message provided"
-              }</p>
-              <p><strong>Submission Date:</strong> ${new Date(
-                data.createdAt
-              ).toLocaleString()}</p>
-            </div>
-          </div>
-        `;
-      }
-
-      const msg = {
-        to: process.env.ADMIN_EMAIL,
-        from: process.env.SENDGRID_FROM_EMAIL || "noreply@academy.com",
-        subject: subject,
-        html: html,
-      };
-
-      console.log("Attempting to send email via SendGrid REST API:");
-      console.log("- From:", msg.from);
-      console.log("- To:", msg.to);
-      console.log("- Subject:", msg.subject);
-
-      // Send email using SendGrid REST API
-      try {
-        await sgMail.send(msg);
-        console.log("Email sent successfully via SendGrid REST API");
-        return {
-          success: true,
-          message: "Email sent successfully",
-        };
-      } catch (error) {
-        console.error("Error sending email via SendGrid:", error);
-        if (error.response) {
-          console.error("SendGrid error response:", error.response.body);
-        }
-        return { success: false, error: error.message };
-      }
-    } else if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-      // Use Gmail with Nodemailer (fallback)
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-        connectionTimeout: 30000,
-        greetingTimeout: 30000,
-        socketTimeout: 30000,
-      });
-
-      // Format email based on form type
-      let subject, html;
-      if (data.type === "enrollment") {
-        subject = `New Course Enrollment: ${data.course}`;
-        html = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #003366;">🎓 New Course Enrollment</h2>
-            <div style="background-color: #f5f7fa; padding: 20px; border-radius: 8px;">
-              <p><strong>Name:</strong> ${data.name}</p>
-              <p><strong>Email:</strong> ${data.email}</p>
-              <p><strong>Phone:</strong> ${data.phone}</p>
-              <p><strong>Course:</strong> ${data.course}</p>
-              <p><strong>Experience Level:</strong> ${
-                data.experience || "Not specified"
-              }</p>
-              <p><strong>Submission Date:</strong> ${new Date(
-                data.createdAt
-              ).toLocaleString()}</p>
-            </div>
-          </div>
-        `;
-      } else {
-        subject = "New Contact Message";
-        html = `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #003366;">📧 New Contact Message</h2>
-            <div style="background-color: #f5f7fa; padding: 20px; border-radius: 8px;">
-              <p><strong>Name:</strong> ${data.name}</p>
-              <p><strong>Email:</strong> ${data.email}</p>
-              <p><strong>Phone:</strong> ${data.phone}</p>
-              <p><strong>Course Interest:</strong> ${
-                data.course || "Not specified"
-              }</p>
-              <p><strong>Message:</strong> ${
-                data.message || "No message provided"
-              }</p>
-              <p><strong>Submission Date:</strong> ${new Date(
-                data.createdAt
-              ).toLocaleString()}</p>
-            </div>
-          </div>
-        `;
-      }
-
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.ADMIN_EMAIL,
-        subject: subject,
-        html: html,
-      };
-
-      console.log("Attempting to send email via Gmail SMTP:");
-      console.log("- From:", mailOptions.from);
-      console.log("- To:", mailOptions.to);
-      console.log("- Subject:", mailOptions.subject);
-
-      // Add retry mechanism with exponential backoff
-      let lastError;
-      for (let i = 0; i < 3; i++) {
-        try {
-          const info = await transporter.sendMail(mailOptions);
-          console.log("Email sent successfully via Gmail SMTP:", info.messageId);
-          return {
-            success: true,
-            message: "Email sent successfully",
-            messageId: info.messageId,
-          };
-        } catch (error) {
-          lastError = error;
-          console.log(`Email attempt ${i + 1} failed:`, error.message);
-          console.log("Error details:", {
-            code: error.code,
-            command: error.command,
-            response: error.response,
-            responseCode: error.responseCode
-          });
-          
-          if (i < 2) {
-            // Wait with exponential backoff (2s, 4s)
-            await new Promise(resolve => setTimeout(resolve, Math.pow(2, i + 1) * 1000));
-          }
-        }
-      }
-      
-      throw lastError;
+        </div>
+      `;
     } else {
-      console.warn("No valid email configuration found");
+      subject = "New Contact Message";
+      html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #003366;">📧 New Contact Message</h2>
+          <div style="background-color: #f5f7fa; padding: 20px; border-radius: 8px;">
+            <p><strong>Name:</strong> ${data.name}</p>
+            <p><strong>Email:</strong> ${data.email}</p>
+            <p><strong>Phone:</strong> ${data.phone}</p>
+            <p><strong>Course Interest:</strong> ${
+              data.course || "Not specified"
+            }</p>
+            <p><strong>Message:</strong> ${
+              data.message || "No message provided"
+            }</p>
+            <p><strong>Submission Date:</strong> ${new Date(
+              data.createdAt
+            ).toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    const msg = {
+      to: process.env.ADMIN_EMAIL,
+      from: process.env.SENDGRID_FROM_EMAIL || "noreply@academy.com",
+      subject: subject,
+      html: html,
+    };
+
+    console.log("Attempting to send email via SendGrid REST API:");
+    console.log("- From:", msg.from);
+    console.log("- To:", msg.to);
+    console.log("- Subject:", msg.subject);
+
+    // Send email using SendGrid REST API
+    try {
+      const response = await sgMail.send(msg);
+      console.log("Email sent successfully via SendGrid REST API");
+      console.log("SendGrid Response:", {
+        statusCode: response[0].statusCode,
+        headers: response[0].headers
+      });
       return {
         success: true,
-        message: "Email notification skipped (no valid configuration)",
+        message: "Email sent successfully",
       };
+    } catch (error) {
+      console.error("Error sending email via SendGrid:", error);
+      if (error.response) {
+        console.error("SendGrid error response:", error.response.body);
+        // Log more detailed error information
+        console.error("SendGrid error details:", {
+          code: error.code,
+          message: error.message,
+          statusCode: error.response.statusCode,
+          body: error.response.body
+        });
+      }
+      return { success: false, error: error.message };
     }
   } catch (error) {
     console.error("Error sending email:", error);
-    console.error("Email error details:", {
-      code: error.code,
-      command: error.command,
-      message: error.message,
-      stack: error.stack
-    });
     return { success: false, error: error.message };
   }
 };
