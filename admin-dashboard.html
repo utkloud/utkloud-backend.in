@@ -50,18 +50,18 @@
         }
         
         .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
+            background: #ff6b6b;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 8px 15px;
+            border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
+            font-weight: bold;
             transition: background 0.3s ease;
         }
         
         .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: #ff5252;
         }
         
         .stats-container {
@@ -73,18 +73,13 @@
         
         .stat-card {
             background: white;
-            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
-            transition: transform 0.3s ease;
         }
         
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-value {
+        .stat-number {
             font-size: 2.5rem;
             font-weight: bold;
             color: #003366;
@@ -93,23 +88,49 @@
         
         .stat-label {
             color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            width: 300px;
+            font-size: 1rem;
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
             font-size: 1rem;
         }
         
         .enrollments-section {
             background: white;
             border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            margin: 30px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
         
-        .section-title {
+        .section-header {
+            background: #003366;
+            color: white;
+            padding: 20px;
             font-size: 1.5rem;
-            color: #003366;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
+        }
+        
+        #enrollments-table {
+            padding: 20px;
         }
         
         table {
@@ -124,84 +145,62 @@
         }
         
         th {
-            background-color: #003366;
-            color: white;
-            font-weight: 600;
-        }
-        
-        tr:nth-child(even) {
             background-color: #f8f9fa;
+            font-weight: bold;
+            color: #003366;
         }
         
         tr:hover {
-            background-color: #e9f7fe;
-        }
-        
-        .refresh-btn {
-            background: linear-gradient(135deg, #003366, #004080);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            float: right;
-            margin-bottom: 20px;
-        }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0, 51, 102, 0.3);
+            background-color: #f8f9fa;
         }
         
         .course-tag {
-            display: inline-block;
             padding: 5px 10px;
-            border-radius: 20px;
+            border-radius: 15px;
             font-size: 0.85rem;
-            font-weight: 600;
+            font-weight: bold;
         }
         
-        .course-az104 {
-            background-color: #e3f2fd;
-            color: #1976d2;
+        .course-python { background-color: #3776ab; color: white; }
+        .course-ml { background-color: #ff6b6b; color: white; }
+        .course-ds { background-color: #4ecdc4; color: white; }
+        .course-web { background-color: #45b7d1; color: white; }
+        .course-app { background-color: #96ceb4; color: white; }
+        .course-ui { background-color: #feca57; color: #333; }
+        .course-other { background-color: #a0a0a0; color: white; }
+        
+        .error {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
         }
         
-        .course-az305 {
-            background-color: #e8f5e9;
-            color: #388e3c;
-        }
-        
-        .course-devops {
-            background-color: #fff3e0;
-            color: #f57c00;
-        }
-        
-        .course-bundle {
-            background-color: #fce4ec;
-            color: #c2185b;
-        }
-        
-        .loading {
+        .empty-state {
             text-align: center;
             padding: 40px;
             color: #666;
         }
         
-        .error {
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
+        .empty-state img {
+            width: 100px;
+            opacity: 0.5;
+            margin-bottom: 20px;
         }
         
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
-                text-align: center;
+                gap: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                width: 100%;
             }
             
             .stats-container {
@@ -209,14 +208,8 @@
             }
             
             th, td {
-                padding: 10px 8px;
+                padding: 10px 5px;
                 font-size: 0.9rem;
-            }
-            
-            .refresh-btn {
-                float: none;
-                width: 100%;
-                margin-top: 15px;
             }
         }
     </style>
@@ -224,7 +217,7 @@
 <body>
     <header>
         <div class="header-content">
-            <div class="logo">AI<span>Academy</span> Admin</div>
+            <div class="logo">AI <span>Academy</span></div>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
     </header>
@@ -233,72 +226,53 @@
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-label">Total Enrollments</div>
-                <div class="stat-value" id="total-enrollments">0</div>
-                <div class="stat-label">All time</div>
+                <div class="stat-number" id="total-enrollments">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Today</div>
-                <div class="stat-value" id="today-enrollments">0</div>
-                <div class="stat-label">New today</div>
+                <div class="stat-label">Today's Enrollments</div>
+                <div class="stat-number" id="today-enrollments">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">AZ-104</div>
-                <div class="stat-value" id="az104-count">0</div>
-                <div class="stat-label">Administrator</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">AZ-305</div>
-                <div class="stat-value" id="az305-count">0</div>
-                <div class="stat-label">Architect</div>
+                <div class="stat-label">Courses Offered</div>
+                <div class="stat-number" id="courses-count">6</div>
             </div>
         </div>
         
+        <div class="controls">
+            <input type="text" class="search-box" placeholder="Search enrollments..." id="search-input" onkeyup="searchEnrollments()">
+            <select class="filter-select" id="course-filter" onchange="filterEnrollments()">
+                <option value="">All Courses</option>
+                <option value="Python Programming">Python Programming</option>
+                <option value="Machine Learning">Machine Learning</option>
+                <option value="Data Science">Data Science</option>
+                <option value="Web Development">Web Development</option>
+                <option value="App Development">App Development</option>
+                <option value="UI/UX Design">UI/UX Design</option>
+            </select>
+        </div>
+        
         <div class="enrollments-section">
-            <h2 class="section-title">Recent Enrollments</h2>
-            <button class="refresh-btn" onclick="loadEnrollments()">Refresh Data</button>
+            <div class="section-header">Recent Enrollments</div>
             <div id="enrollments-table">
-                <div class="loading">Loading enrollments...</div>
+                <div class="empty-state">
+                    <div>Loading enrollments...</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // API endpoint (uses relative path to work with deployed backend)
-        const API_URL = '/api/enrollment';
-        
-        // Check authentication on page load
-        window.onload = function() {
-            checkAuth();
-        };
-        
-        // Check if user is authenticated
+        // Check if user is logged in by making a request to the auth check endpoint
         async function checkAuth() {
             try {
-                const response = await fetch('/api/auth/check', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.status === 401) {
-                    // Not authenticated, redirect to login
-                    window.location.href = '/login.html';
-                    return;
-                }
-                
+                const response = await fetch('/api/auth/check');
                 const data = await response.json();
-                if (data.success) {
-                    // Authenticated, load enrollments
-                    loadEnrollments();
-                } else {
-                    // Not authenticated, redirect to login
+                
+                if (!data.success) {
                     window.location.href = '/login.html';
                 }
             } catch (error) {
-                console.error('Auth check failed:', error);
-                // For simplicity, we'll load enrollments anyway in case of network errors
-                loadEnrollments();
+                window.location.href = '/login.html';
             }
         }
         
@@ -306,29 +280,30 @@
         async function logout() {
             try {
                 await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                    method: 'POST'
                 });
-                
-                // Redirect to login page
-                window.location.href = '/login.html';
             } catch (error) {
-                console.error('Logout failed:', error);
-                // Still redirect to login page
+                console.error('Logout error:', error);
+            } finally {
                 window.location.href = '/login.html';
             }
         }
         
-        // Fetch enrollments from backend
+        // Fetch enrollments on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkAuth();
+            loadEnrollments();
+        });
+        
+        // Load enrollments from API
         async function loadEnrollments() {
             try {
-                const response = await fetch(`${API_URL}/all`);
+                const response = await fetch('/api/enrollment/all');
+                
                 const data = await response.json();
                 
                 if (data.success) {
-                    renderEnrollments(data.data);
+                    displayEnrollments(data.data);
                     updateStats(data.data);
                 } else {
                     showError('Failed to load enrollments: ' + data.message);
@@ -338,15 +313,16 @@
             }
         }
         
-        // Render enrollments table
-        function renderEnrollments(enrollments) {
-            if (!enrollments || enrollments.length === 0) {
-                document.getElementById('enrollments-table').innerHTML = '<p>No enrollments found.</p>';
+        // Display enrollments in table
+        function displayEnrollments(enrollments) {
+            if (enrollments.length === 0) {
+                document.getElementById('enrollments-table').innerHTML = `
+                    <div class="empty-state">
+                        <div>No enrollments found</div>
+                    </div>
+                `;
                 return;
             }
-            
-            // Sort by timestamp (newest first)
-            enrollments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             
             let tableHTML = `
                 <table>
@@ -357,6 +333,7 @@
                             <th>Phone</th>
                             <th>Course</th>
                             <th>Experience</th>
+                            <th>Message</th>
                             <th>Date</th>
                         </tr>
                     </thead>
@@ -364,7 +341,8 @@
             `;
             
             enrollments.forEach(enrollment => {
-                const date = new Date(enrollment.timestamp);
+                // Use createdAt instead of timestamp
+                const date = new Date(enrollment.createdAt);
                 const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                 
                 tableHTML += `
@@ -374,6 +352,7 @@
                         <td>${enrollment.phone || '-'}</td>
                         <td><span class="course-tag course-${getCourseClass(enrollment.course)}">${enrollment.course || '-'}</span></td>
                         <td>${enrollment.experience || '-'}</td>
+                        <td>${enrollment.message || '-'}</td>
                         <td>${formattedDate}</td>
                     </tr>
                 `;
@@ -395,32 +374,38 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const todayCount = enrollments.filter(e => {
-                const enrollmentDate = new Date(e.timestamp);
+                const enrollmentDate = new Date(e.createdAt);
                 enrollmentDate.setHours(0, 0, 0, 0);
                 return enrollmentDate.getTime() === today.getTime();
             }).length;
+            
             document.getElementById('today-enrollments').textContent = todayCount;
-            
-            // Count by course
-            const courseCounts = {};
-            enrollments.forEach(e => {
-                const course = e.course || 'unknown';
-                courseCounts[course] = (courseCounts[course] || 0) + 1;
-            });
-            
-            document.getElementById('az104-count').textContent = courseCounts['AZ-104'] || 0;
-            document.getElementById('az305-count').textContent = courseCounts['AZ-305'] || 0;
         }
         
-        // Helper function for course tag styling
+        // Helper function to get course class for styling
         function getCourseClass(course) {
+            if (!course) return 'other';
+            
             const courseMap = {
-                'AZ-104': 'az104',
-                'AZ-305': 'az305',
-                'Azure DevOps': 'devops',
-                'Complete Bundle': 'bundle'
+                'Python Programming': 'python',
+                'Machine Learning': 'ml',
+                'Data Science': 'ds',
+                'Web Development': 'web',
+                'App Development': 'app',
+                'UI/UX Design': 'ui'
             };
-            return courseMap[course] || 'bundle';
+            
+            return courseMap[course] || 'other';
+        }
+        
+        // Search enrollments
+        function searchEnrollments() {
+            // Implementation would go here
+        }
+        
+        // Filter enrollments by course
+        function filterEnrollments() {
+            // Implementation would go here
         }
         
         // Show error message

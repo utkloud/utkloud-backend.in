@@ -163,6 +163,9 @@
                     successMessage.textContent = data.message;
                     successMessage.style.display = 'block';
                     
+                    // Set session storage to indicate logged in status
+                    sessionStorage.setItem('loggedIn', 'true');
+                    
                     // Redirect to admin dashboard after successful login
                     setTimeout(() => {
                         window.location.href = '/admin-dashboard.html';
