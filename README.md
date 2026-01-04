@@ -13,6 +13,20 @@ This is the backend service for handling form submissions from the AI Academy we
 2. **Configure Environment Variables**
    The `.env` file already contains the MongoDB connection string. Update other values as needed:
    ```
+   PORT=5000
+   NODE_ENV=development
+
+   # MongoDB Configuration
+   MONGODB_URI=mongodb+srv://academy-website:11223344@cluster0.jctj5xk.mongodb.net/?appName=Cluster0
+
+   # Admin Credentials (for dashboard access)
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=securepassword
+
+   # Email configuration (for Gmail)
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
+   ADMIN_EMAIL=admin@yourcompany.com
    ```
 
 3. **Start the Server**
