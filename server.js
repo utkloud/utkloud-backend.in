@@ -49,6 +49,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(__dirname));
 
+// Redirect root to login page
+app.get("/", (req, res) => {
+  res.redirect("/login.html");
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
