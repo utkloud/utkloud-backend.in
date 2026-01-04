@@ -17,16 +17,13 @@ This is the backend service for handling form submissions from the AI Academy we
    NODE_ENV=development
 
    # MongoDB Configuration
-   MONGODB_URI=mongodb+srv://academy-website:11223344@cluster0.jctj5xk.mongodb.net/?appName=Cluster0
+   MONGODB_URI=
 
    # Admin Credentials (for dashboard access)
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=securepassword
+   ADMIN_USERNAME=
+   ADMIN_PASSWORD=
 
-   # Email configuration (for Gmail)
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   ADMIN_EMAIL=admin@yourcompany.com
+
    ```
 
 3. **Start the Server**
